@@ -180,6 +180,7 @@ class _MailPageState extends State<MailPage> {
                                   children: <Widget>[
                                     Showcase(
                                       key: _one,
+                                      title: "Title test",
                                       description: 'Tap to see menu options',
                                       disableDefaultTargetGestures: true,
                                       child: GestureDetector(
@@ -314,7 +315,7 @@ class _MailPageState extends State<MailPage> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Showcase(
             key: key,
-            description: 'Tap to check mail',
+            title: 'Tap to check mail',
             tooltipPosition: TooltipPosition.top,
             disposeOnTap: true,
             onTargetClick: () {

@@ -47,6 +47,7 @@ class ToolTipWidget extends StatefulWidget {
   final double? contentHeight;
   final double? contentWidth;
   final VoidCallback? onTooltipTap;
+  final VoidCallback? onClose;
   final EdgeInsets? tooltipPadding;
   final Duration movingAnimationDuration;
   final bool disableMovingAnimation;
@@ -77,6 +78,7 @@ class ToolTipWidget extends StatefulWidget {
     required this.contentHeight,
     required this.contentWidth,
     required this.onTooltipTap,
+    required this.onClose,
     required this.movingAnimationDuration,
     required this.descriptionAlignment,
     this.tooltipPadding = const EdgeInsets.symmetric(vertical: 8),
@@ -110,6 +112,8 @@ class _ToolTipWidgetState extends State<ToolTipWidget>
   double tooltipWidth = 0;
   double tooltipScreenEdgePadding = 20;
   double tooltipTextPadding = 15;
+  final double closeSize = 20;
+
 
   TooltipPosition findPositionForContent(Offset position) {
     var height = 120.0;
@@ -145,7 +149,7 @@ class _ToolTipWidgetState extends State<ToolTipWidget>
             widget.tooltipPadding!.right +
             widget.tooltipPadding!.left +
             (widget.titlePadding?.right ?? 0) +
-            (widget.titlePadding?.left ?? 0);
+            (widget.titlePadding?.left ?? 0) + (widget.onClose == null ? 0 : closeSize);
     final descriptionLength = widget.description == null
         ? 0
         : (_textSize(widget.description!, descriptionStyle).width +
@@ -239,7 +243,7 @@ class _ToolTipWidgetState extends State<ToolTipWidget>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       if (widget.container != null &&
           _customContainerKey.currentContext != null &&
           _customContainerKey.currentContext?.size != null) {
@@ -420,41 +424,26 @@ class _ToolTipWidgetState extends State<ToolTipWidget>
                                     : CrossAxisAlignment.center,
                                 children: <Widget>[
                                   widget.title != null
-                                      ? Padding(
-                                          padding: widget.titlePadding ??
-                                              EdgeInsets.zero,
-                                          child: Text(
-                                            widget.title!,
-                                            textAlign: widget.titleAlignment,
-                                            style: widget.titleTextStyle ??
-                                                Theme.of(context)
-                                                    .textTheme
-                                                    .headline6!
-                                                    .merge(
-                                                      TextStyle(
-                                                        color: widget.textColor,
-                                                      ),
-                                                    ),
-                                          ),
-                                        )
+                                      ? _titleToolTip()
                                       : const SizedBox.shrink(),
-                                  Padding(
-                                    padding: widget.descriptionPadding ??
-                                        EdgeInsets.zero,
-                                    child: Text(
-                                      widget.description!,
-                                      textAlign: widget.descriptionAlignment,
-                                      style: widget.descTextStyle ??
-                                          Theme.of(context)
-                                              .textTheme
-                                              .subtitle2!
-                                              .merge(
-                                                TextStyle(
-                                                  color: widget.textColor,
-                                                ),
+                                  if (widget.description != null)
+                                    Padding(
+                                      padding: widget.descriptionPadding ??
+                                          EdgeInsets.zero,
+                                      child: Text(
+                                        widget.description!,
+                                        textAlign: widget.descriptionAlignment,
+                                        style: widget.descTextStyle ??
+                                            Theme.of(context)
+                                                .textTheme
+                                                .subtitle2!
+                                                .merge(
+                                              TextStyle(
+                                                color: widget.textColor,
                                               ),
+                                            ),
+                                      ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -527,6 +516,44 @@ class _ToolTipWidgetState extends State<ToolTipWidget>
           ..layout())
         .size;
     return textPainter;
+  }
+
+  Widget _titleToolTip() {
+    final tilte = Padding(
+      padding: widget.titlePadding ??
+          EdgeInsets.zero,
+      child: Text(
+        widget.title!,
+        textAlign: widget.titleAlignment,
+        style: widget.titleTextStyle ??
+            Theme.of(context)
+                .textTheme
+                .headline6!
+                .merge(
+              TextStyle(
+                color: widget.textColor,
+              ),
+            ),
+      ),
+    );
+    if (widget.onClose == null) {
+      return tilte;
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        tilte,
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: BoxConstraints(),
+          iconSize: closeSize,
+          icon: const Icon(
+            Icons.close,
+            color: Colors.grey,
+          ),
+          onPressed: widget.onClose ,
+        )
+      ],);
   }
 }
 

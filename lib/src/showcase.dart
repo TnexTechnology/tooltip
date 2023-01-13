@@ -209,6 +209,7 @@ class Showcase extends StatefulWidget {
   ///
   /// Defaults to Curves.easeIn
   final Curve scaleAnimationCurve;
+  final bool isShowClose;
 
   /// An alignment to origin of initial tooltip animation.
   ///
@@ -236,9 +237,9 @@ class Showcase extends StatefulWidget {
   const Showcase({
     required this.key,
     required this.child,
-    this.title,
+    required this.title,
     this.titleAlignment = TextAlign.start,
-    required this.description,
+    this.description,
     this.descriptionAlignment = TextAlign.start,
     this.targetShapeBorder = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(
@@ -249,8 +250,8 @@ class Showcase extends StatefulWidget {
     this.overlayOpacity = 0.75,
     this.titleTextStyle,
     this.descTextStyle,
-    this.tooltipBackgroundColor = Colors.white,
-    this.textColor = Colors.black,
+    this.tooltipBackgroundColor = const Color(0xFF1A2F45),
+    this.textColor = Colors.white,
     this.scrollLoadingWidget = const CircularProgressIndicator(
         valueColor: AlwaysStoppedAnimation(Colors.white)),
     this.showArrow = true,
@@ -275,6 +276,7 @@ class Showcase extends StatefulWidget {
     this.tooltipPosition,
     this.titlePadding,
     this.descriptionPadding,
+    this.isShowClose = true
   })  : height = null,
         width = null,
         container = null,
@@ -317,6 +319,7 @@ class Showcase extends StatefulWidget {
     this.onTargetDoubleTap,
     this.disableDefaultTargetGestures = false,
     this.tooltipPosition,
+    this.isShowClose = true,
   })  : showArrow = false,
         onToolTipClick = null,
         scaleAnimationDuration = const Duration(milliseconds: 300),
@@ -467,6 +470,11 @@ class _ShowcaseState extends State<Showcase> {
     _isTooltipDismissed = false;
   }
 
+  Future<void> _dimissTooltip() async {
+    await _reverseAnimateTooltip();
+    showCaseWidgetState.dismiss();
+  }
+
   Widget buildOverlayOnTarget(
     Offset offset,
     Size size,
@@ -555,6 +563,9 @@ class _ShowcaseState extends State<Showcase> {
                   contentHeight: widget.height,
                   contentWidth: widget.width,
                   onTooltipTap: _getOnTooltipTap,
+                  onClose: widget.isShowClose ? () {
+                    _dimissTooltip();
+                  } : null,
                   tooltipPadding: widget.tooltipPadding,
                   disableMovingAnimation: widget.disableMovingAnimation ??
                       showCaseWidgetState.disableMovingAnimation,
